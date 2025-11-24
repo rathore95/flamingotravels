@@ -11,29 +11,17 @@ on:
 
 jobs:
   build_and_deploy_job:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    if: github.event_name == 'push' || 
+        (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     permissions:
-       id-token: write
-       contents: read
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v3
         with:
-          submodules: true
-          lfs: false
-
-      - name: Install OIDC Client from Core Package
-        run: npm install @actions/core@1.6.0 @actions/http-client
-
-      - name: Get Id Token
-        uses: actions/github-script@v6
-        id: idtoken
-        with:
-           script: |
-               const coredemo = require('@actions/core')
-               return await coredemo.getIDToken()
-           result-encoding: string
+          submodules: false
 
       - name: Build And Deploy
         id: builddeploy
@@ -42,11 +30,11 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WONDERFUL_MEADOW_09F69531E }}
           action: "upload"
 
-          # 👇 STATIC WEBSITE CONFIG (no build)
-          app_location: "/"     # HTML files at root
-          api_location: ""      # no API
-          output_location: "/"   # IMPORTANT: no build folder
-
+          # Static Website Settings (NO BUILD)
+          app_location: "/"       # Your HTML files are in the repo root
+          api_location: ""        # No API
+          output_location: "/"    # IMPORTANT: Upload root directory exactly as-is
+          
           github_id_token: ${{ steps.idtoken.outputs.result }}
 
   close_pull_request_job:
@@ -59,5 +47,3 @@ jobs:
         uses: Azure/static-web-apps-deploy@v1
         with:
           action: "close"
-
-
